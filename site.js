@@ -1,3 +1,27 @@
+// Remember how this visitor first arrived (used only in enquiry emails)
+(function(){
+  try {
+    if (sessionStorage.getItem('aipr_src')) return;
+    var r = document.referrer || '', q = new URLSearchParams(location.search), src = '';
+    var utm = q.get('utm_source');
+    if (utm) src = utm + (q.get('utm_medium') ? ' / ' + q.get('utm_medium') : '');
+    else if (!r) src = 'Direct (typed the address, a bookmark, or an app like WhatsApp)';
+    else {
+      var h = ''; try { h = new URL(r).hostname.replace(/^www\./, ''); } catch(e) { h = r; }
+      if (h.indexOf('affluentindiapr') !== -1) return;
+      if (/google\./.test(h)) src = 'Google search';
+      else if (/instagram\.com/.test(h)) src = 'Instagram';
+      else if (/linkedin\.com|lnkd\.in/.test(h)) src = 'LinkedIn';
+      else if (/facebook\.com|fb\.me|m\.facebook/.test(h)) src = 'Facebook';
+      else if (/bing\.com|duckduckgo|yahoo\./.test(h)) src = 'Other search engine (' + h + ')';
+      else if (/whatsapp/.test(h)) src = 'WhatsApp';
+      else if (/t\.co$|twitter\.com|x\.com/.test(h)) src = 'X / Twitter';
+      else src = 'Another website: ' + h;
+    }
+    sessionStorage.setItem('aipr_src', src);
+    sessionStorage.setItem('aipr_land', location.pathname.replace(/^\//, '') || 'home page');
+  } catch(e) {}
+})();
 // Always open a new page at the top (unless a #section link was used)
 (function(){
   try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e) {}
@@ -371,6 +395,7 @@ const PRESS = {
         if (!(new FormData(f).get('company-website'))) {
           data._subject = 'New website enquiry from ' + document.getElementById('enq-name').value.trim();
           data._template = 'table'; data._captcha = 'false';
+          try { data.came_from = sessionStorage.getItem('aipr_src') || 'Unknown'; data.first_page = sessionStorage.getItem('aipr_land') || ''; } catch(e) { data.came_from = 'Unknown'; }
           if (/^\S+@\S+\.\S+$/.test(data.contact || '')) data._replyto = data.contact;
           fetch('https://formsubmit.co/ajax/bhavika@affluentindiapr.com', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) }).catch(() => {});
         }
