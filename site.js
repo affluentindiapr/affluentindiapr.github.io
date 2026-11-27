@@ -397,6 +397,7 @@ const PRESS = {
           data._template = 'table'; data._captcha = 'false';
           try { data.came_from = sessionStorage.getItem('aipr_src') || 'Unknown'; data.first_page = sessionStorage.getItem('aipr_land') || ''; } catch(e) { data.came_from = 'Unknown'; }
           if (/^\S+@\S+\.\S+$/.test(data.contact || '')) data._replyto = data.contact;
+          try { if (window.gtag) gtag('event', 'generate_lead', { form: 'enquiry', came_from: data.came_from }); } catch(e) {}
           fetch('https://formsubmit.co/ajax/bhavika@affluentindiapr.com', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(data) }).catch(() => {});
         }
       } catch (e) {}
